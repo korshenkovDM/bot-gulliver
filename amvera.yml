@@ -1,0 +1,14 @@
+---
+version: null
+meta:
+  environment: golang
+  toolchain:
+    name: go
+    version: 1.23.2
+build:
+  image: golang:1.23.2
+run:
+  persistenceMount: /data
+  image: golang:1.23.2
+  containerPort: 80
+serviceType: compute

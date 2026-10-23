@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"log"
+	"os"
+	"time"
+)
 
 type Contract struct {
 	Name      string
@@ -52,7 +57,30 @@ func (contract *Contract) SetupDate(t time.Time) *Contract {
 	return contract
 }
 
-func (contract *Contract) SaveContract()
+func (contract *Contract) SaveContract() {
+	var mp = make(map[string]Contract)
+	data, err := os.ReadFile("contract.json")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	json.Unmarshal(data, &mp)
+	if tmp, ok := mp[contract.Name]; ok {
+		contract.DateBegin = tmp.DateBegin
+	}
+	mp[contract.Name] = *contract
+
+	data, err = json.MarshalIndent(mp, "	", "	")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	err = os.WriteFile("contract.json", data, 0666)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
 
 func ListContract() map[string]Contract {
 	return make(map[string]Contract)

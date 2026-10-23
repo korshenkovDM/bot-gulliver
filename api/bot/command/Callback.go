@@ -55,7 +55,8 @@ func cmdPay(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 		models.RequestMap[chatID].Status = "credit"
 
 	}
-	*msg.ReplyMarkup = models.MoneyMenuCredit()
+	k := models.MoneyMenuCredit()
+	msg.ReplyMarkup = &k
 	models.RequestMap[chatID].Status = "month"
 	return msg
 }

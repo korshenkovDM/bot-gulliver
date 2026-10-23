@@ -12,7 +12,7 @@ var RequestMap = map[int64]*Request{
 	920344106:  {Name: "VaraVar", ChatID: 920344106, Group: 0},  //varya
 	5649164769: {Name: "Romulus", ChatID: 5649164769, Group: 1}, //rome
 	1410865161: {Name: "Gendalf", ChatID: 1410865161, Group: 1}, //gena
-	1:          {Name: "test", ChatID: 1, Group: 1},
+	1:          {Name: "test", ChatID: 1, Group: 2},
 }
 
 type Request struct {

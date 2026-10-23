@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"time"
@@ -78,14 +79,37 @@ func Contract(client string, status string, t time.Time) {
 	models.CreateContract().SetupName(client).SetupDate(t).SetupStatus(status).SaveContract()
 }
 
-func EndContract() map[string]models.Contract {
+// Day.SaveDay() Day.NewDay(t)
+func EndDay() string {
+	if err := models.D.SaveDay(); err != nil {
+		log.Println(err)
+	}
+	return ActiveList()
+}
+
+func NewDay() {
+	models.D = models.Day{}
 	t := time.Now()
+	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	t = t.AddDate(0, 0, 1)
+	models.D.Date = t
+}
+
+func EndContractList() string {
+
 	contracts := models.ListContract()
 
+	names := []string{}
 	for _, contract := range contracts {
-		if contract.Status == models.StatusActive && contract.DateEnd.Before(t) {
+		if contract.Status == models.StatusActive && contract.EndContract() {
+			names = append(names, contract.Name)
 			delete(contracts, contract.Name)
 		}
 	}
-	return contracts
+
+	str := bytes.Buffer{}
+	for i := range names {
+		str.WriteString(names[i] + "\n")
+	}
+	return str.String()
 }

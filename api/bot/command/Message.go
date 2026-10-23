@@ -3,8 +3,6 @@ package command
 import (
 	models "bot-gulliver/api/bot/models"
 	"bot-gulliver/do"
-	back "bot-gulliver/models"
-	"time"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -49,20 +47,29 @@ func cmdEndDay(id int64) []tg.MessageConfig {
 	if models.RequestMap[id].Group != 0 {
 		return []tg.MessageConfig{}
 	}
+	endDay := do.EndDay()
+	endContract := do.EndContractList()
+	do.NewDay()
 
-	var t time.Time
-	var text string
-	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	err := back.D.SaveDay()
-	if err != nil {
-		text = err.Error()
+	return helperSpam(endDay, endContract)
+}
+
+func helperSpam(text1, text2 string) []tg.MessageConfig {
+	var msgs = make([]tg.MessageConfig, 0, 4)
+	for _, user := range models.RequestMap {
+		var msg tg.MessageConfig
+		msg.ChatID = user.ChatID
+		msg.ParseMode = "Markdown"
+		msg.Text = ""
+		if user.Group == 2 {
+			continue
+		} else if user.Group == 0 {
+			msg.Text += text1
+		}
+		if user.Group == 1 || user.Group == 0 {
+			msg.Text += text2
+		}
+		msgs = append(msgs, msg)
 	}
-	back.D = back.CreateDay().SetupDate(t)
-	back.ListContractSave(do.EndContract())
-	var msg tg.MessageConfig
-
-	msg.ChatID = id
-	msg.Text = text
-	msg.ParseMode = "Markdown"
-	return []tg.MessageConfig{msg}
+	return msgs
 }

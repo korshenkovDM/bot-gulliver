@@ -36,6 +36,8 @@ func Bot(token string) {
 	go GoCallback(InCallback, OutCallback)
 	go GoSender(bot, OutMessage, OutCallback)
 
+	log.Println("BOT START!!!")
+
 	for update := range updates {
 
 		if update.Message != nil {

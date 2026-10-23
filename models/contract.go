@@ -82,6 +82,15 @@ func (contract *Contract) SaveContract() {
 	}
 }
 
+func (contract *Contract) EndContract() bool {
+	t := time.Now()
+	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	if contract.DateEnd.Equal(t) || contract.DateEnd.After(t) {
+		return true
+	}
+	return false
+}
+
 func ListContract() map[string]Contract {
 	var mp = make(map[string]Contract)
 	data, err := os.ReadFile("contract.json")
@@ -93,7 +102,7 @@ func ListContract() map[string]Contract {
 	return mp
 }
 
-func ListContractSave(contracts map[string]Contract) {
+func ListSaveContract(contracts map[string]Contract) {
 	data, err := json.MarshalIndent(contracts, "	", "	")
 	if err != nil {
 		log.Println(err)

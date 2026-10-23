@@ -16,7 +16,7 @@ func Message(req *models.Request) []tg.MessageConfig {
 		//Разовый
 		//EndDay
 		return comm(req.ChatID)
-	} else {
+	} else if command.Names(commandWord) {
 		// если это не команда, то это фамилия человека из ListContract
 		firstName := commandWord
 		log.Println("pickName input: ", firstName)
@@ -24,8 +24,14 @@ func Message(req *models.Request) []tg.MessageConfig {
 			return pickName
 		}
 	}
+	// если это не команда и не фамилия человека, то это новый абонемент
+	var msg tg.MessageConfig
 
-	return []tg.MessageConfig{tg.NewMessage(req.ChatID, "запрос не получилось обработать")}
+	msg.ChatID = req.ChatID
+	msg.Text, msg.ReplyMarkup, msg.ParseMode = req.RequestText, models.MainMenu(), "Markdown"
+	req.Status = "main"
+
+	return []tg.MessageConfig{msg}
 }
 
 func Callback(req *models.Request) tg.EditMessageTextConfig {

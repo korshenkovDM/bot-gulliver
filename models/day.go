@@ -26,9 +26,14 @@ func (day *Day) SetupDate(t time.Time) Day {
 }
 
 func (day *Day) AddAct(act Act) {
-	timeLine := act.Date
-	index := timeLine.Hour() - 10
+	timeLine, t := act.Date, act.Date
+	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 
+	if !day.Date.Equal(t) {
+		day.Date = t
+	}
+
+	index := timeLine.Hour() - 10
 	if index == 13 {
 		index--
 	}

@@ -3,6 +3,7 @@ package handler
 import (
 	command "bot-gulliver/api/bot/command"
 	models "bot-gulliver/api/bot/models"
+	"log"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -18,6 +19,7 @@ func Message(req *models.Request) []tg.MessageConfig {
 	} else {
 		// если это не команда, то это фамилия человека из ListContract
 		firstName := commandWord
+		log.Println("pickName input: ", firstName)
 		if pickName, ok := command.SearchName(firstName, req.ChatID); ok {
 			return pickName
 		}

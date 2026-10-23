@@ -58,7 +58,7 @@ func cmdEndDay(id int64) []tg.MessageConfig {
 		text = err.Error()
 	}
 	back.D = back.CreateDay().SetupDate(t)
-
+	back.ListContractSave(do.EndContract())
 	var msg tg.MessageConfig
 
 	msg.ChatID = id

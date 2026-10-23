@@ -74,5 +74,18 @@ func Act(user, client string, service string, price int, t time.Time) {
 
 // CreateContract().SetupName(client).SetupDate(t).SetupStatus(status).SaveContract()
 func Contract(client string, status string, t time.Time) {
+
 	models.CreateContract().SetupName(client).SetupDate(t).SetupStatus(status).SaveContract()
+}
+
+func EndContract() map[string]models.Contract {
+	t := time.Now()
+	contracts := models.ListContract()
+
+	for _, contract := range contracts {
+		if contract.Status == models.StatusActive && contract.DateEnd.Before(t) {
+			delete(contracts, contract.Name)
+		}
+	}
+	return contracts
 }

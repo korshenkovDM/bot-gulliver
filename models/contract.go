@@ -92,3 +92,16 @@ func ListContract() map[string]Contract {
 	json.Unmarshal(data, &mp)
 	return mp
 }
+
+func ListContractSave(contracts map[string]Contract) {
+	data, err := json.MarshalIndent(contracts, "	", "	")
+	if err != nil {
+		log.Println(err)
+
+	}
+	err = os.WriteFile("contract.json", data, 0666)
+	if err != nil {
+		log.Println(err)
+
+	}
+}

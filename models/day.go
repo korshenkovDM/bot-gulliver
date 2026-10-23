@@ -36,7 +36,6 @@ func (day *Day) AddAct(act Act) {
 		day.Hour[index] = make([]Act, 0)
 	}
 	day.Hour[index] = append(day.Hour[index], act)
-
 }
 
 func (day *Day) DelAct() {}

@@ -47,15 +47,15 @@ func cmdVisit(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 
 func cmdPay(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	var msg tg.EditMessageTextConfig
+	k := models.MoneyMenuCredit()
 	msg.ChatID, msg.MessageID = chatID, messID
 	if contract, ok := back.ListContract()[name]; ok &&
 		contract.Status == back.Credit {
 		// close credit
-		*msg.ReplyMarkup = models.MoneyMenu()
+		k = models.MoneyMenu()
 		models.RequestMap[chatID].Status = "credit"
 
 	}
-	k := models.MoneyMenuCredit()
 	msg.ReplyMarkup = &k
 	models.RequestMap[chatID].Status = "month"
 	return msg

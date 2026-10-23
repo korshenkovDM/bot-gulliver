@@ -40,7 +40,8 @@ func PickName(chatID int64, msgID int, secondName string) (tg.EditMessageTextCon
 	msg.ChatID, msg.MessageID = chatID, msgID
 	msg.Text = fullName
 	msg.ParseMode = "Markdown"
-	*msg.ReplyMarkup = models.MainMenu()
+	k := models.MainMenu()
+	msg.ReplyMarkup = &k
 
 	return msg, true
 }

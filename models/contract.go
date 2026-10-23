@@ -83,5 +83,12 @@ func (contract *Contract) SaveContract() {
 }
 
 func ListContract() map[string]Contract {
-	return make(map[string]Contract)
+	var mp = make(map[string]Contract)
+	data, err := os.ReadFile("contract.json")
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	json.Unmarshal(data, &mp)
+	return mp
 }

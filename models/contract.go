@@ -85,7 +85,7 @@ func (contract *Contract) SaveContract() {
 func (contract *Contract) EndContract() bool {
 	t := time.Now()
 	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	if contract.DateEnd.Equal(t) || contract.DateEnd.After(t) {
+	if contract.DateEnd.Equal(t) || t.After(contract.DateEnd) {
 		return true
 	}
 	return false

@@ -106,7 +106,7 @@ func EndContractList() string {
 			delete(contracts, contract.Name)
 		}
 	}
-
+	models.ListSaveContract(contracts)
 	str := bytes.Buffer{}
 	for i := range names {
 		str.WriteString(names[i] + "\n")

@@ -7,6 +7,7 @@ import (
 
 // 🟢🟡🔴💰💳🧨🏋‍♂️❄️🔥
 func main() {
+
 	token := restroom.Start()
 	api.Bot(token)
 }

@@ -16,8 +16,9 @@ var Message = map[string]func(int64) []tg.MessageConfig{
 	"ВСЕ":     cmdAll,
 	"АКТИВ":   cmdActive,
 	// soft
-	"ENDDAY": cmdEndDay,
-	//	"contract": cmdContract,
+	"ENDDAY":   cmdEndDay,
+	"CONTRACT": cmdContract,
+	"ОТМЕНА":   cmdRecover,
 	//
 	// "SAVEDAY": cmdSaveDay
 }
@@ -49,6 +50,7 @@ func cmdActive(id int64) []tg.MessageConfig {
 	return []tg.MessageConfig{msg}
 }
 
+// soft
 func cmdEndDay(id int64) []tg.MessageConfig {
 	if models.RequestMap[id].Group != 0 {
 		return []tg.MessageConfig{}
@@ -75,6 +77,11 @@ func cmdContract(id int64) []tg.MessageConfig {
 		}
 	}
 	back.ListSaveContract(contracts)
+	return []tg.MessageConfig{}
+}
+
+func cmdRecover(id int64) []tg.MessageConfig {
+
 	return []tg.MessageConfig{}
 }
 

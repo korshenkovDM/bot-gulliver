@@ -85,3 +85,10 @@ func Weekday(day string) string {
 	}
 	return answer
 }
+
+func SearchTmpFile() bool {
+	filepath := "tmp.json"
+
+	_, err := os.Stat(filepath)
+	return err == nil
+}

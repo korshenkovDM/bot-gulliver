@@ -1,6 +1,7 @@
 package handler
 
 import (
+	//command "bot-gulliver/api/bot/command"
 	command "bot-gulliver/api/bot/command"
 	models "bot-gulliver/api/bot/models"
 	"log"
@@ -22,6 +23,14 @@ func Message(req *models.Request) []tg.MessageConfig {
 		log.Println("pickName input: ", firstName)
 		if pickName, ok := command.SearchName(firstName, req.ChatID); ok {
 			return pickName
+		} else {
+			// если нет, то это плохой запрос
+			var msg tg.MessageConfig
+
+			msg.ChatID = req.ChatID
+			msg.Text = "не нашел таких хомяков\n или не понял команды"
+			msg.ParseMode = "Markdown"
+			return []tg.MessageConfig{msg}
 		}
 	}
 	// если это не команда и не фамилия человека, то это новый абонемент

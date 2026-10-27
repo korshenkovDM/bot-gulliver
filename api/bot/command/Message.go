@@ -1,8 +1,10 @@
 package command
 
 import (
+	//	models "bot-gulliver/api/bot/models"
 	models "bot-gulliver/api/bot/models"
 	"bot-gulliver/do"
+	back "bot-gulliver/models"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -13,7 +15,11 @@ var Message = map[string]func(int64) []tg.MessageConfig{
 	"РАЗОВЫЙ": cmdOne,
 	"ВСЕ":     cmdAll,
 	"АКТИВ":   cmdActive,
-	"ENDDAY":  cmdEndDay,
+	// soft
+	"ENDDAY": cmdEndDay,
+	//	"contract": cmdContract,
+	//
+	// "SAVEDAY": cmdSaveDay
 }
 
 func cmdOne(id int64) []tg.MessageConfig {
@@ -52,6 +58,24 @@ func cmdEndDay(id int64) []tg.MessageConfig {
 	do.NewDay()
 
 	return helperSpam(endDay, endContract)
+}
+
+func cmdContract(id int64) []tg.MessageConfig {
+	group := models.RequestMap[id].Group
+
+	if group != 0 {
+		return []tg.MessageConfig{}
+	}
+
+	contracts := back.ListContract()
+
+	for key, contract := range contracts {
+		if contract.EndContract() {
+			delete(contracts, key)
+		}
+	}
+	back.ListSaveContract(contracts)
+	return []tg.MessageConfig{}
 }
 
 func helperSpam(text1, text2 string) []tg.MessageConfig {

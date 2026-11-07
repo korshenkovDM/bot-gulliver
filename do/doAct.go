@@ -41,5 +41,3 @@ func ActiveList() string {
 	str.WriteRune('\n')
 	return str.String()
 }
-
-func ListAct()

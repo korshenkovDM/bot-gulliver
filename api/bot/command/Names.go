@@ -9,7 +9,7 @@ import (
 )
 
 // if len(str) == 1(значит это поиск по фамилии)
-func Names(name string) bool {
+func If_Len_1(name string) bool {
 	return len(strings.Split(name, " ")) == 1
 }
 

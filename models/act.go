@@ -39,6 +39,6 @@ func (act *Act) SetupData(nameClient string, service string, price int) *Act {
 	return act
 }
 
-func (act *Act) SaveAct() {
-	D.AddAct(*act)
+func (act *Act) ReturnAct() Act {
+	return *act
 }

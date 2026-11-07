@@ -1,6 +1,7 @@
-package models
+package day
 
 import (
+	"bot-gulliver/models"
 	"encoding/json"
 	"log"
 	"os"
@@ -11,43 +12,38 @@ var D Day
 
 type Day struct {
 	Date time.Time
-	Hour [13][]Act
+	Hour [13][]models.Act
 }
 
-func CreateDay() *Day {
-	return &Day{}
-}
-
-func (day *Day) SetupDate(t time.Time) Day {
+// устанавливает время t = t.AddDate(0,0,1)
+func SetupDate(t time.Time) {
 	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	t.AddDate(0, 0, 1)
-	day.Date = t
-	return *day
+	D.Date = t
+	return
 }
 
-func (day *Day) AddAct(act Act) {
+func AddAct(act models.Act) {
 	timeLine, t := act.Date, act.Date
 	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 
-	if !day.Date.Equal(t) {
-		day.Date = t
+	if !D.Date.Equal(t) {
+		D.Date = t
 	}
 
 	index := timeLine.Hour() - 10
 	if index == 13 {
 		index--
 	}
-	if day.Hour[index] == nil {
-		day.Hour[index] = make([]Act, 0)
+	if D.Hour[index] == nil {
+		D.Hour[index] = make([]models.Act, 0, 4)
 	}
-	day.Hour[index] = append(day.Hour[index], act)
+	D.Hour[index] = append(D.Hour[index], act)
 }
 
-func (day *Day) DelAct() {}
-
-func (day *Day) SaveDay() error {
+func SaveDay() error {
 	var d Day
-	d = *day
+	d = D
 	t := time.Now()
 	data, err := os.ReadFile("activity.json")
 	if err != nil {
@@ -78,4 +74,9 @@ func (day *Day) SaveDay() error {
 		return err
 	}
 	return err
+}
+
+func NewDay() {
+	D = Day{}
+	SetupDate(time.Now())
 }

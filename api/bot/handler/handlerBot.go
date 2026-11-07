@@ -4,7 +4,6 @@ import (
 	//command "bot-gulliver/api/bot/command"
 	command "bot-gulliver/api/bot/command"
 	models "bot-gulliver/api/bot/models"
-	"log"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -17,28 +16,28 @@ func Message(req *models.Request) []tg.MessageConfig {
 		//Разовый
 		//EndDay
 		return comm(req.ChatID)
-	} else if command.Names(commandWord) {
+	}
+
+	if firstName := commandWord; command.If_Len_1(commandWord) {
 		// если это не команда, то это фамилия человека из ListContract
-		firstName := commandWord
-		log.Println("pickName input: ", firstName)
 		if pickName, ok := command.SearchName(firstName, req.ChatID); ok {
 			return pickName
-		} else {
-			// если нет, то это плохой запрос
-			var msg tg.MessageConfig
-
-			msg.ChatID = req.ChatID
-			msg.Text = "не нашел таких хомяков\n или не понял команды"
-			msg.ParseMode = "Markdown"
-			return []tg.MessageConfig{msg}
 		}
-	}
-	// если это не команда и не фамилия человека, то это новый абонемент
-	var msg tg.MessageConfig
 
+		var msg tg.MessageConfig
+		// если не нашел такую фамилию среди действующих абонементов
+		msg.ChatID = req.ChatID
+		msg.Text = "не нашел таких хомяков\n или не понял команды"
+		msg.ParseMode = "Markdown"
+		return []tg.MessageConfig{msg}
+	}
+
+	// если это не команда и не фамилия человека, то это новый абонемент(len == 2)
+	// сразу открываем панель оплаты
+	var msg tg.MessageConfig
 	msg.ChatID = req.ChatID
-	msg.Text, msg.ReplyMarkup, msg.ParseMode = req.RequestText, models.MainMenu(), "Markdown"
-	req.Status = "main"
+	msg.Text, msg.ReplyMarkup, msg.ParseMode = req.RequestText, models.MoneyMenuCredit(), "Markdown"
+	req.Status = "month"
 
 	return []tg.MessageConfig{msg}
 }

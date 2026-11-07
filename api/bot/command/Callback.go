@@ -29,17 +29,22 @@ var Callback = map[string]func(int64, int, string) tg.EditMessageTextConfig{
 // main command
 func cmdVisit(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	var msg tg.EditMessageTextConfig
-	var price int
 	var method = back.Visit
+
 	msg.ChatID, msg.MessageID = chatID, messID
 	_, user := models.RequestMap[chatID].Status, models.RequestMap[chatID].Name
-	if contract, ok := back.ListContract()[name]; ok {
+	if contract, ok := do.ListContract()[name]; ok {
 		if contract.Status == back.PauseOn {
 			method = back.PauseOff
 			contract.SetupStatus(back.PauseOff).SaveContract()
 		}
+		// если кредитный истек
+		if contract.Status == back.Credit && contract.EndContract() {
+			msg.Text = "должен денег\nкредитный истек"
+			return msg
+		}
 	}
-	do.Act(user, name, method, price, time.Now())
+	do.Act(user, name, method, 0, time.Now())
 	msg.Text = restroom.Answer(method, name)
 	models.RequestMap[chatID].Status = ""
 	return msg
@@ -48,18 +53,21 @@ func cmdVisit(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 func cmdPay(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	var msg tg.EditMessageTextConfig
 	k := models.MoneyMenuCredit()
+
 	msg.ChatID, msg.MessageID = chatID, messID
-	if contract, ok := back.ListContract()[name]; ok &&
+	msg.Text = "выбери способ оплаты"
+	msg.ReplyMarkup = &k
+	models.RequestMap[chatID].Status = "month"
+
+	if contract, ok := do.ListContract()[name]; ok &&
 		contract.Status == back.Credit {
 		// close credit
 		k = models.MoneyMenu()
 		models.RequestMap[chatID].Status = "credit"
 
 	}
-	msg.Text = "выбери способ оплаты"
+
 	msg.ParseMode = "Markdown"
-	msg.ReplyMarkup = &k
-	models.RequestMap[chatID].Status = "month"
 	return msg
 }
 
@@ -70,7 +78,7 @@ func cmdPause(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 
 	msg.ChatID, msg.MessageID = chatID, messID
 	_, user := models.RequestMap[chatID].Status, models.RequestMap[chatID].Name
-	if contract, ok := back.ListContract()[name]; ok {
+	if contract, ok := do.ListContract()[name]; ok {
 		if contract.Status == back.StatusActive {
 			contract.SetupStatus(back.StatusPause).SaveContract()
 		} else if contract.Status == back.StatusPause {
@@ -99,7 +107,7 @@ func cmdCash(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 		do.Contract(name, back.StatusActive, time.Now())
 	}
 	if status == "credit" {
-		if contract, ok := back.ListContract()[name]; ok &&
+		if contract, ok := do.ListContract()[name]; ok &&
 			contract.Status == back.Credit {
 			contract.SetupStatus(back.StatusActive).SaveContract()
 		}
@@ -108,7 +116,7 @@ func cmdCash(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 
 	}
 	do.Act(user, name, status+method, price, time.Now())
-	msg.Text = restroom.Answer(method+status, name)
+	msg.Text = restroom.Answer(status+method, name)
 	models.RequestMap[chatID].Status = ""
 	return msg
 }
@@ -127,11 +135,15 @@ func cmdCard(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 		do.Contract(name, back.StatusActive, time.Now())
 	}
 	if status == "credit" {
+		if contract, ok := do.ListContract()[name]; ok &&
+			contract.Status == back.Credit {
+			contract.SetupStatus(back.StatusActive).SaveContract()
+		}
 		price = 1200
 		status = "close" + back.Credit
 	}
 	do.Act(user, name, status+method, price, time.Now())
-	msg.Text = restroom.Answer(method, name)
+	msg.Text = restroom.Answer(status+method, name)
 	models.RequestMap[chatID].Status = ""
 	return msg
 }
@@ -143,9 +155,10 @@ func cmdCredit(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	msg.ChatID, msg.MessageID = chatID, messID
 	status, user := models.RequestMap[chatID].Status, models.RequestMap[chatID].Name
 
-	do.Act(user, name, status+method, price, time.Now())
 	do.Contract(name, method, time.Now())
-	msg.Text = restroom.Answer(method, name)
+	do.Act(user, name, status+method, price, time.Now())
+
+	msg.Text = restroom.Answer(status+method, name)
 	models.RequestMap[chatID].Status = ""
 	return msg
 }

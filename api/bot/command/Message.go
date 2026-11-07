@@ -3,8 +3,8 @@ package command
 import (
 	//	models "bot-gulliver/api/bot/models"
 	models "bot-gulliver/api/bot/models"
+	"bot-gulliver/day"
 	"bot-gulliver/do"
-	back "bot-gulliver/models"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -16,9 +16,8 @@ var Message = map[string]func(int64) []tg.MessageConfig{
 	"ВСЕ":     cmdAll,
 	"АКТИВ":   cmdActive,
 	// soft
-	"ENDDAY":   cmdEndDay,
-	"CONTRACT": cmdContract,
-	"ОТМЕНА":   cmdRecover,
+	"ENDDAY": cmdEndDay,
+	"ОТМЕНА": cmdRecover,
 	//
 	// "SAVEDAY": cmdSaveDay
 }
@@ -37,7 +36,7 @@ func cmdOne(id int64) []tg.MessageConfig {
 func cmdAll(id int64) []tg.MessageConfig {
 	var msg tg.MessageConfig
 	msg.ChatID = id
-	msg.Text = do.ContractsList()
+	msg.Text = do.ContractList()
 	msg.ParseMode = "Markdown"
 	return []tg.MessageConfig{msg}
 }
@@ -52,32 +51,22 @@ func cmdActive(id int64) []tg.MessageConfig {
 
 // soft
 func cmdEndDay(id int64) []tg.MessageConfig {
-	if models.RequestMap[id].Group != 0 {
-		return []tg.MessageConfig{}
-	}
-	endDay := do.EndDay()
-	endContract := do.EndContractList()
-	do.NewDay()
-
-	return helperSpam(endDay, endContract)
-}
-
-func cmdContract(id int64) []tg.MessageConfig {
 	group := models.RequestMap[id].Group
 
 	if group != 0 {
-		return []tg.MessageConfig{}
+		return nil
 	}
-
-	contracts := back.ListContract()
-
-	for key, contract := range contracts {
-		if contract.EndContract() {
-			delete(contracts, key)
-		}
+	// идет всем
+	endNames := do.ListContractEnd()
+	// идет мне и Варе
+	actsList := do.ActiveList()
+	// сохраняем день в базу
+	if day.SaveDay() != nil {
+		return nil
 	}
-	back.ListSaveContract(contracts)
-	return []tg.MessageConfig{}
+	// создаем новый день
+	day.NewDay()
+	return helperSpam(actsList, endNames)
 }
 
 func cmdRecover(id int64) []tg.MessageConfig {
@@ -85,6 +74,8 @@ func cmdRecover(id int64) []tg.MessageConfig {
 	return []tg.MessageConfig{}
 }
 
+// text1 идет только Варе и Диме
+// text 2 идет всем
 func helperSpam(text1, text2 string) []tg.MessageConfig {
 	var msgs = make([]tg.MessageConfig, 0, 4)
 	for _, user := range models.RequestMap {

@@ -14,7 +14,7 @@ import (
 func Contract(client string, status string, t time.Time) {
 	// если контракт действующий
 	if contract, ok := ListContract()[client]; ok {
-		contract.DateEnd.AddDate(0, 0, 30)
+		contract.DateEnd = contract.DateEnd.AddDate(0, 0, 30)
 		contract.SaveContract()
 		return
 	}

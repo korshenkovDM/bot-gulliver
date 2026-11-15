@@ -50,7 +50,7 @@ func Callback(req *models.Request) tg.EditMessageTextConfig {
 		//cancel
 		return comm(req.ChatID, req.Callback.Message.MessageID, req.RequestText)
 	} else {
-		// если это не команда, то это имя человека из listContract
+		// если это не команда, то это кнопка имени человека из listContract
 		secondName := commandWord
 		if pickName, ok := command.PickName(req.ChatID, req.Callback.Message.MessageID, secondName); ok {
 			return pickName

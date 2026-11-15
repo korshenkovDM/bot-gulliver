@@ -34,16 +34,20 @@ func cmdVisit(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	msg.ChatID, msg.MessageID = chatID, messID
 	_, user := models.RequestMap[chatID].Status, models.RequestMap[chatID].Name
 	if contract, ok := do.ListContract()[name]; ok {
+		// если это человек с замороженным абонементом
+		// размараживаем
 		if contract.Status == back.PauseOn {
 			method = back.PauseOff
 			contract.SetupStatus(back.PauseOff).SaveContract()
 		}
-		// если кредитный истек
+		// если это человек с кредитным, который истек
+		// просим погасить кредитный
 		if contract.Status == back.Credit && contract.EndContract() {
 			msg.Text = "должен денег\nкредитный истек"
 			return msg
 		}
 	}
+	// отмечаем человек по абонементу
 	do.Act(user, name, method, 0, time.Now())
 	msg.Text = restroom.Answer(method, name)
 	models.RequestMap[chatID].Status = ""
@@ -61,6 +65,8 @@ func cmdPay(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 
 	if contract, ok := do.ListContract()[name]; ok &&
 		contract.Status == back.Credit {
+		// если это человек с кредитным
+		// открываем меню оплаты
 		// close credit
 		k = models.MoneyMenu()
 		models.RequestMap[chatID].Status = "credit"
@@ -100,13 +106,22 @@ func cmdCash(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	msg.ChatID, msg.MessageID = chatID, messID
 	status, user := models.RequestMap[chatID].Status, models.RequestMap[chatID].Name
 	if status == "one" {
+		// если это разовый за cash
+		// цена 200
 		price = 200
 	}
 	if status == "month" {
+		// если это новый абонемент за cash
+		// создаем его
+		// цена 1200
 		price = 1200
 		do.Contract(name, back.StatusActive, time.Now())
 	}
+
 	if status == "credit" {
+		// если это закрытие кредитный за cash
+		// меняем статус
+		// цена 1200
 		if contract, ok := do.ListContract()[name]; ok &&
 			contract.Status == back.Credit {
 			contract.SetupStatus(back.StatusActive).SaveContract()
@@ -128,13 +143,21 @@ func cmdCard(chatID int64, messID int, name string) tg.EditMessageTextConfig {
 	msg.ChatID, msg.MessageID = chatID, messID
 	status, user := models.RequestMap[chatID].Status, models.RequestMap[chatID].Name
 	if status == "one" {
+		// если это разовый за card
+		// цена 200
 		price = 200
 	}
 	if status == "month" {
+		// если это новый абонемент за card
+		// создаем его
+		// цена 1200
 		price = 1200
 		do.Contract(name, back.StatusActive, time.Now())
 	}
 	if status == "credit" {
+		// если это закрытие кредитный за card
+		// меняем статус
+		// цена 1200
 		if contract, ok := do.ListContract()[name]; ok &&
 			contract.Status == back.Credit {
 			contract.SetupStatus(back.StatusActive).SaveContract()
